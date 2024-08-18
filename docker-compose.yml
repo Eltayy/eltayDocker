@@ -1,0 +1,67 @@
+version: "3"
+services:
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name : ${PROJECT_NAME}_nginx
+    ports: 
+      - "80:80"
+    networks:
+      - internal
+    volumes:
+      - ./www/:/var/www/html/
+      - ./logs/nginx:/var/log/nginx/
+    links:
+      - php
+
+  php:
+    build:
+      dockerfile: docker/php/Dockerfile
+    container_name: ${PROJECT_NAME}_php
+    networks:
+      - internal
+    volumes:
+      - ./www/:/var/www/html/
+      - ./logs/php.log:/var/log/fpm-php.www.log
+    depends_on:
+      - mariadb
+    links:
+      - maildev
+    ports:
+      - ":9000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      
+  mariadb:
+    image: mariadb:11
+    container_name: ${PROJECT_NAME}_mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: passroot
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - ./db/:/home
+    networks:
+      - internal
+    ports:
+      - 3306:3306
+
+  maildev:
+    platform: linux/amd64
+    image: djfarrelly/maildev
+    container_name: ${PROJECT_NAME}_maildev
+    command: bin/maildev --web 80 --smtp 25 --hide-extensions STARTTLS
+    networks:
+      - internal
+    ports:
+        - 8003:80
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  mariadb-data:

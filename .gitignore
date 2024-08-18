@@ -1,0 +1,16 @@
+# General
+.DS_Store
+._*
+.vscode
+.env
+
+# Folder 
+db/
+logs/
+
+# Logs file
+*.log
+
+www/
+
+docker/nginx/default.conf
