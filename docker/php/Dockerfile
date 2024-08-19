@@ -8,7 +8,7 @@ RUN apt-get install -y libzip-dev zlib1g-dev libpng-dev && \
     docker-php-ext-install zip
     
 RUN docker-php-ext-configure intl && \
-    docker-php-ext-install intl pdo_mysql
+    docker-php-ext-install intl pdo pdo_mysql
 
 RUN docker-php-ext-install gd bcmath opcache
 
